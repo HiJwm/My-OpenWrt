@@ -9,7 +9,7 @@
 
 ##### 固件发布:
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/HiJwm/My_OpenWrt?style=for-the-badge&label=固件下载)](https://github.com/HiJwm/My-OpenWrt/releases/latest)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/HiJwm/My-OpenWrt?style=for-the-badge&label=固件下载)](https://github.com/HiJwm/My-OpenWrt/releases)
 
 
 
