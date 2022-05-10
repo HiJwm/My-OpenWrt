@@ -1,7 +1,7 @@
 #=================================================
 # Description: Build OpenWrt using GitHub Actions
 # Lisence: MIT
-# Author: HiJwm base on kenzok8
+# Author: HiJwm
 #=================================================
 
 name: Immortal
