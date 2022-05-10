@@ -8,6 +8,11 @@
 
 <img src="https://v2.jinrishici.com/one.svg?font-size=24&spacing=2&color=Red">
 
+#### 说明 
+
+* 源码更新，自动触发编译。
+
+
 ### 固件发布:
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/HiJwm/My-OpenWrt?style=for-the-badge&label=固件下载)](https://github.com/HiJwm/My-OpenWrt/releases)
