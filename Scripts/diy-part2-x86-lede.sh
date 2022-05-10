@@ -34,7 +34,7 @@ git clone https://github.com/jerrykuku/luci-app-argon-config.git ./package/luci-
 
 # Change default BackGround img
 # rm ./package/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
-wget -O ./package/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg https://github.com/jiawm/My-OpenWrt/raw/main/BackGround/2.jpg
+wget -O ./package/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg https://github.com/HiJwm/MySettings/raw/main/BackGround/2.jpg
 svn co https://github.com/xylz0928/luci-mod/trunk/feeds/luci/modules/luci-base/htdocs/luci-static/resources/icons ./package/lucimod
 mv package/lucimod/* feeds/luci/modules/luci-base/htdocs/luci-static/resources/icons/
 
