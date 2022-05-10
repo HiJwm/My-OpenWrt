@@ -7,6 +7,12 @@
 
 <img src="https://v2.jinrishici.com/one.svg?font-size=24&spacing=2&color=Black">
 
+##### 固件发布:
+
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/HiJwm/My_OpenWrt?style=for-the-badge&label=固件下载)](https://github.com/HiJwm/My-OpenWrt/releases/latest)
+
+
+
 #### 源码来源：
 [![Lienol](https://img.shields.io/badge/package-Lienol-blueviolet.svg?style=flat&logo=appveyor)](https://github.com/Lienol/openwrt) 
 [![immortalwrt](https://img.shields.io/badge/immortalwrt-openwrt-orange.svg?style=flat&logo=appveyor)](https://github.com/immortalwrt/immortalwrt) 
