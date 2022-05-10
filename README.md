@@ -1,4 +1,7 @@
 ﻿#### AutoBuild-OpenWrt
+ 
+[1]: https://img.shields.io/badge/license-MIT-brightgreen.svg
+[2]: /LICENSE
 <img src="https://v2.jinrishici.com/one.svg?font-size=24&spacing=2&color=Black">
 
 ## Credits
