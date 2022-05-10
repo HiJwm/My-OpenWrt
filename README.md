@@ -12,7 +12,7 @@
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/HiJwm/My-OpenWrt?style=for-the-badge&label=固件下载)](https://github.com/HiJwm/My-OpenWrt/releases)
 
-## Credits
+## 感谢作者：
 
 - [Microsoft Azure](https://azure.microsoft.com)
 - [GitHub Actions](https://github.com/features/actions)
@@ -30,6 +30,6 @@
 - [peter-evans/repository-dispatch](https://github.com/peter-evans/repository-dispatch)
 
 
-## License
+## 授权License
 
-[MIT](https://github.com/P3TERX/Actions-OpenWrt/blob/main/LICENSE) © [**P3TERX**](https://p3terx.com)
+[MIT](https://github.com/P3TERX/Actions-OpenWrt/blob/main/LICENSE) © [**P3TERX**](https://p3terx.com) And  [**HiJwm**](https://github.com/HiJwm/My-OpenWrt)
