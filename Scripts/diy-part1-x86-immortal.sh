@@ -19,6 +19,6 @@ echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.defau
 echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall' >>feeds.conf.default
 
 # Add a feed source
-git clone https://github.com/281677160/openwrt-package.git package/otherpackage
+git clone https://github.com/kenzok8/openwrt-packages.git package/otherpackage
 #git clone https://github.com/linkease/nas-packages-luci.git package/nas #添加ddnsto和linkease
 #git clone https://github.com/linkease/istore.git package/istore #添加istore
