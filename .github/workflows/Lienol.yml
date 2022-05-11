@@ -193,6 +193,7 @@ jobs:
         echo "::set-output name=url::$(cat wetransfer.log | grep https | cut -f3 -d" ")"
 
     - name: 钉钉推送
+      id: dingtalk
       if: steps.organize.outputs.status == 'success' && env.DingDing_push == 'true' && !cancelled()
       run: |
         send_dingding="curl -s \"https://oapi.dingtalk.com/robot/send?access_token=${whkey}\" -H 'Content-Type: application/json' -d '{\"msgtype\": \"markdown\",\"markdown\": {\"title\":"
