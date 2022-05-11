@@ -36,7 +36,7 @@ env:
   DingDing_push: true
     
 jobs:
-  build:
+  merge:
     runs-on: ubuntu-20.04
     
     name: Build ${{matrix.target}}
@@ -61,12 +61,7 @@ jobs:
         sudo -E apt-get -qq clean ) &
         sudo timedatectl set-timezone "$TZ"
 
-    - name: Clone source code
-      working-directory: /workdir
-      run: |
-        df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+    
 
     - name: 设置当前的日期&发送DingDing通知
       id: date
@@ -85,7 +80,11 @@ jobs:
         nowtime=`date "+%Y-%m-%d %H:%M:%S"`
         eval "$send_dingding \"${send_content0}\",\"text\":\"${nowtime} $markdown_splitline #### <font color=#6A65FF>${send_content0}</font>\n\n[点此链接查看](${GITHUB_WORKFLOW_URL})\"}}'"
     
-    
+    - name: Clone source code
+      run: |
+        df -hT $PWD
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
     
     - name: Load custom feeds
       run: |
