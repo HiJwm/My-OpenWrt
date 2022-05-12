@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #修改：HiJwm
 
-name: Build OpenWrt（lean2）
+name: Build OpenWrt（lean3）
 
 on:
   repository_dispatch:
