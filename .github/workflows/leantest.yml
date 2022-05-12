@@ -39,6 +39,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
+    
+    name: Build ${{matrix.target}}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [Leantest]
+    
+    
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -59,6 +67,7 @@ jobs:
           sudo mkdir -p /workdir
           sudo chown $USER:$GROUPS /workdir
           df -h
+    
     - name: 设置当前的日期
       id: date
       run: |
