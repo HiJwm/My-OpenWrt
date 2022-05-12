@@ -230,7 +230,7 @@ jobs:
       with:
         retain_days: 1
         keep_minimum_runs: 3
-        env:
+      env:
         GITHUB_TOKEN: ${{ secrets.ACTIONS_TRIGGER_PAT }}
 
     - name: Remove old Releases 删除旧版本
