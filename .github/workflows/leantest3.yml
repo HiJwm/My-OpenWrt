@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [Leantest]
+        target: [Leantest3]
     steps:
     - name: Checkout
       uses: actions/checkout@main
