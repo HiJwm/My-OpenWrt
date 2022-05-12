@@ -219,7 +219,7 @@ jobs:
       if: steps.organize.outputs.status == 'success' && env.DingDing_push == 'true' && !cancelled()
       run: |
         send_dingding="curl -s \"https://oapi.dingtalk.com/robot/send?access_token=${whkey}\" -H 'Content-Type: application/json' -d '{\"msgtype\": \"markdown\",\"markdown\": {\"title\":"
-        send_content1="【${model}】恭喜，${{matrix.target}}源码固件编译成功！
+        send_content1="恭喜，${{matrix.target}}源码固件编译成功！
         markdown_splitline="\n\n---\n\n"
         GITHUB_WORKFLOW_URL=https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
         nowtime=`date "+%Y-%m-%d %H:%M:%S"`
