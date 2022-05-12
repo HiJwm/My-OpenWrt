@@ -59,7 +59,10 @@ jobs:
           sudo mkdir -p /workdir
           sudo chown $USER:$GROUPS /workdir
           df -h
-      
+    - name: 设置当前的日期
+      id: date
+      run: |
+        echo "date1=$(date +'%m.%d')" >> $GITHUB_ENV  
         
 
     - name: Clone source code
@@ -164,7 +167,7 @@ jobs:
       uses: actions/upload-artifact@v2
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: $(date +"%m.%d")_${{matrix.target}}
+        name: ${{ env.date1 }}_${{matrix.target}}
         path: ${{ env.FIRMWARE }}
 
     - name: Upload firmware to cowtransfer
