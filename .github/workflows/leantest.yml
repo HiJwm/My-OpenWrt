@@ -201,7 +201,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.tag.outputs.release_tag }}__${{matrix.target}}
+        tag_name: ${{ steps.tag.outputs.release_tag }}_${{matrix.target}}
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
