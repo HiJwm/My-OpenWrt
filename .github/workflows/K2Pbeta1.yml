@@ -116,11 +116,9 @@ jobs:
       run: |
         curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="开始编译【${{matrix.target}}】" --data "content=🎉 主人💕：您的编译脚本成功触发，【${{matrix.target}}】文件夹编译【${{env.TARGET_PROFILE}}】中,请耐心等待...... 😋(${{env.Date2}})" "http://www.pushplus.plus/send"
       
-      
-     
-      
-    
+        
     #- name: DingDing_push 1消息通知1
+    #   continue-on-error: true
     #  if: env.DingDing_push == 'true' && !cancelled()
     #  run: |
     #   send_dingding="curl -s \"https://oapi.dingtalk.com/robot/send?access_token=${whkey}\" -H 'Content-Type: application/json' -d '{\"msgtype\": \"markdown\",\"markdown\": {\"title\":"
