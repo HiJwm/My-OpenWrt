@@ -1,0 +1,259 @@
+
+#
+# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+#修改：HiJwm
+
+name: Build K2Pbeta
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
+
+env:
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  FEEDS_CONF: feeds.conf.default
+  CONFIG_FILE: MenuConfig/MakeMenu.K2P.config
+  DIY_P1_SH: Scripts/diy-part1-x86-lede.sh
+  DIY_P2_SH: Scripts/diy-part2-x86-lede.sh
+  UPLOAD_BIN_DIR: true
+  UPLOAD_FIRMWARE: true
+  UPLOAD_COWTRANSFER: false
+  UPLOAD_WETRANSFER: true
+  UPLOAD_RELEASE: true
+  TZ: Asia/Shanghai
+  whkey: ${{ secrets.WEBHOOK }}
+  DingDing_push: true
+  REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    name: Build ${{matrix.target}}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [K2Pbeta]
+    steps:
+    - name: Checkout 检查
+      uses: actions/checkout@main
+
+    - name: Initialization environment 初始化环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+        df -h
+    - name: 设置当前的日期
+      id: date
+      run: |
+        echo "date1=$(date +'%Y.%m.%d-%H%M')" >> $GITHUB_ENV  
+        echo "date2=$(date +'%m/%d %Y')" >> $GITHUB_ENV
+        echo "date3=$(date +'%m.%d')" >> $GITHUB_ENV
+        echo "date4=$(date +'%m.%d.%H')" >> $GITHUB_ENV
+        VERSION="$(echo "${{github.event.action}}" | grep -Eo " [0-9.]+" | sed -e 's/ //')" || true
+        [ "$VERSION" ] && echo "VERSION=$VERSION" >> $GITHUB_ENV || echo "VERSION=$(date +'%m.%d')" >> $GITHUB_ENV  
+    
+    - name: Clone source code 克隆源代码
+      working-directory: /workdir
+      run: |
+        df -hT $PWD
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+    
+    - name: Load custom feeds 自定义安装源
+      run: |
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        chmod +x $DIY_P1_SH
+        cd openwrt
+        $GITHUB_WORKSPACE/$DIY_P1_SH
+    
+    - name: Update feeds 更新feeds
+      run: cd openwrt && ./scripts/feeds update -a
+
+    - name: Install feeds 安装feeds
+      run: cd openwrt && ./scripts/feeds install -a
+
+    - name: Load custom configuration 自定义设置
+      run: |
+        [ -e files ] && mv files openwrt/files
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        chmod +x $DIY_P2_SH
+        cd openwrt
+        $GITHUB_WORKSPACE/$DIY_P2_SH
+    
+    - name: SSH connection to Actions SSH连接
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+
+    - name: DingDing_push 1消息通知1
+      if: env.DingDing_push == 'true' && !cancelled()
+      run: |
+       send_dingding="curl -s \"https://oapi.dingtalk.com/robot/send?access_token=${whkey}\" -H 'Content-Type: application/json' -d '{\"msgtype\": \"markdown\",\"markdown\": {\"title\":"
+       send_content0="【${{matrix.target}}】源码正在启动编译！请等候，6小时后若无编译成功消息提示，请点击以下网址查看原因。"
+       markdown_splitline="\n\n---\n\n"
+       GITHUB_WORKFLOW_URL=https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+       nowtime=`date "+%Y-%m-%d %H:%M:%S"`
+       eval "$send_dingding \"${send_content0}\",\"text\":\"${nowtime} $markdown_splitline #### <font color=#6A65FF>${send_content0}</font>\n\n[点此链接查看](${GITHUB_WORKFLOW_URL})\"}}'"
+    
+    
+    - name: Download package 下载包
+      id: package
+      run: |
+        cd openwrt
+        make defconfig
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+    
+    - name: Compile the firmware 编译固件
+      id: compile
+      run: |
+        cd openwrt
+        echo -e "$(nproc) thread compile"
+        make -j$(nproc) || make -j1 || make -j1 V=s
+        echo "::set-output name=status::success"
+        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV #定义设备名称
+        
+    
+    - name: Check space usage 检查空间使用情况
+      if: (!cancelled())
+      run: df -hT
+
+    - name: Upload bin directory 上传bin目录下所有文件
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      with:
+        name: ${{matrix.target}}_OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.date1 }}
+        path: openwrt/bin
+
+    - name: Organize files 整理文件
+      id: organize
+      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      run: |
+        mkdir firmware
+        mv -f openwrt/bin/targets/*/*/{*combined*,*sysupgrade*} ./firmware/ 2>/dev/null || true
+        #cp openwrt/.config  ./firmware/${{matrix.target}}.config
+        #cp openwrt/build_dir/target-*/linux-*/linux-*/.config ./firmware/${{matrix.target}}_kernel.config
+        cd firmware
+        echo "v${{ env.date4 }}" > version.txt
+        md5=$((md5sum *squashfs-sysupgrade* || md5sum *squashfs-combined-efi*) | awk '{print $1}') 2>/dev/null
+        echo $md5 >> version.txt
+        rename -v "s/^openwrt/${{ env.VERSION }}-openwrt/" * || true
+        rename -v "s/friendlyarm_//" *gz || true
+        echo $md5 >> version.txt
+        echo ${{matrix.target}} >> version.txt
+        rm -rf sha256sums
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "::set-output name=status::success"
+    
+    - name: Upload firmware directory 上传固件目录下的所有文件
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+        name: ${{matrix.target}}_OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.date1 }}
+        path: ${{ env.FIRMWARE }}
+
+    - name: Upload firmware to cowtransfer 上传固件到cowtransfer
+      id: cowtransfer
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+        echo "::set-output name=url::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
+    
+    - name: Upload firmware to WeTransfer 上传固件到WeTransfer
+      id: wetransfer
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
+        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+        echo "::set-output name=url::$(cat wetransfer.log | grep https | cut -f3 -d" ")"
+    
+    - name: Generate release tag 生成发布标签
+      id: tag
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      run: |
+        echo "::set-output name=release_tag::${{ env.date1 }}"
+        touch release.txt
+        [ $UPLOAD_COWTRANSFER = true ] && echo "🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
+        [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
+        echo "::set-output name=status::success"
+    
+    #- name: Upload firmware to release 发布固件
+    #  uses: softprops/action-gh-release@v1
+    #  if: steps.tag.outputs.status == 'success' && !cancelled()
+    #  env:
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #  with:
+    #    files: "${{ env.FIRMWARE }}/*"
+    #    name: ${{ env.date2 }} ${{matrix.target}}
+    #    tag_name: ${{ env.date1 }}_${{matrix.target}}
+    #    body_path: release.txt
+
+    - name: 发送[在线更新固件]至云端1
+      id: regular
+      continue-on-error: true
+      if: steps.tag.outputs.status == 'success' && !cancelled() 
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.REPO_TOKEN }}
+        file: "${{ env.FIRMWARE }}/*"
+        tag: ${{ env.date1 }}_${{matrix.target}}
+        overwrite: true
+        file_glob: true
+    #- name: DingDing_push推送通知2
+    #  id: dingtalk
+    #  if: steps.organize.outputs.status == 'success' && env.DingDing_push == 'true' && !cancelled()
+    #  run: |
+    #   send_dingding="curl -s \"https://oapi.dingtalk.com/robot/send?access_token=${whkey}\" -H 'Content-Type: application/json' -d '{\"msgtype\": \"markdown\",\"markdown\": {\"title\":"
+    #   send_content1="恭喜，${{matrix.target}}源码固件编译成功！
+    #   markdown_splitline="\n\n---\n\n"
+    #   eval "$send_dingding \"${send_content0}\",\"text\":\"${date1} $markdown_splitline #### <font color=#6A65FF>${send_content0}</font>\n\n[点此链接查看](${GITHUB_WORKFLOW_URL})\"}}'"
+    
+    - name: 删除工作流、释放Actions空间
+      if: env.REPO_TOKEN
+      uses: Mattraks/delete-workflow-runs@main
+      with:
+        token: ${{ secrets.REPO_TOKEN }}
+        repository: ${{ github.repository }}
+        keep_minimum_runs: 3
+        retain_days: 1
+    
+    - name: 删除旧版本releases
+      if: env.REPO_TOKEN
+      uses: dev-drprasad/delete-older-releases@master
+      with:
+        repo: ${{ github.repository }}
+        keep_latest: 3
+        delete_tags: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+    
+    
+   
