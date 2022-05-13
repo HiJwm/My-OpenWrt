@@ -234,12 +234,12 @@ jobs:
           retain_days: 1
     
     - name: 删除releases
-      if: env.REPO_TOKEN
-      uses: dev-drprasad/delete-older-releases@master
-      with:
-        repo: ${{ github.repository }}
-        keep_latest: 1
-        delete_tags: true
+     if: env.REPO_TOKEN
+     uses: dev-drprasad/delete-older-releases@master
+     with:
+       repo: ${{ github.repository }}
+       keep_latest: 1
+       delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
     
