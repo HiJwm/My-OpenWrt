@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #修改：HiJwm
 
-name: Build OpenWrt（lean5）
+name: Build K2P（lean5）
 
 on:
   repository_dispatch:
@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [Leantest5]
+        target: [K2P]
     steps:
     - name: Checkout 检查
       uses: actions/checkout@main
