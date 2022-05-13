@@ -111,6 +111,7 @@ jobs:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
     - name: pushplus信息通知1
+      continue-on-error: true
       if: env.PUSH_PLUS_TOKEN && env.PUSH_PLUS == 'true' && !cancelled()
       run: |
         curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="开始编译【${{matrix.target}}】" --data "content=🎉 主人💕：您的编译脚本成功触发，【${{matrix.target}}】文件夹编译【${{env.TARGET_PROFILE}}】中,请耐心等待...... 😋(${{env.Date2}})" "http://www.pushplus.plus/send"
