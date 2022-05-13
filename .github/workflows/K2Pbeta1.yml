@@ -226,6 +226,18 @@ jobs:
         tag_name: ${{ env.date1 }}_${{matrix.target}}
         body_path: release.txt
 
+    #- name: 发布固件备用，尚有不完善
+    #  id: regular
+    #  continue-on-error: true
+    #  if: steps.tag.outputs.status == 'success' && !cancelled() 
+    #  uses: svenstaro/upload-release-action@v2
+    #  with:
+    #    repo_token: ${{ secrets.REPO_TOKEN }}
+    #    file: "${{ env.FIRMWARE }}/*"
+    #    tag: ${{ env.date1 }}_${{matrix.target}}
+    #    overwrite: true
+    #    file_glob: true
+    
     
     - name: pushplus信息通知2
       continue-on-error: true
