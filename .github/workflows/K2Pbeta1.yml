@@ -36,6 +36,8 @@ env:
   whkey: ${{ secrets.WEBHOOK }}
   DingDing_push: true
   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+  env.PUSH_PLUS_TOKEN
+  PUSH_PLUS: true
 
 jobs:
   build:
@@ -108,15 +110,23 @@ jobs:
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
-    - name: DingDing_push 1消息通知1
-      if: env.DingDing_push == 'true' && !cancelled()
+    - name: pushplus信息通知1
+      if: env.PUSH_PLUS_TOKEN && env.PUSH_PLUS == 'true' && !cancelled()
       run: |
-       send_dingding="curl -s \"https://oapi.dingtalk.com/robot/send?access_token=${whkey}\" -H 'Content-Type: application/json' -d '{\"msgtype\": \"markdown\",\"markdown\": {\"title\":"
-       send_content0="【${{matrix.target}}】源码正在启动编译！请等候，6小时后若无编译成功消息提示，请点击以下网址查看原因。"
-       markdown_splitline="\n\n---\n\n"
-       GITHUB_WORKFLOW_URL=https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
-       nowtime=`date "+%Y-%m-%d %H:%M:%S"`
-       eval "$send_dingding \"${send_content0}\",\"text\":\"${nowtime} $markdown_splitline #### <font color=#6A65FF>${send_content0}</font>\n\n[点此链接查看](${GITHUB_WORKFLOW_URL})\"}}'"
+        curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="开始编译【${{matrix.target}}】" --data "content=🎉 主人💕：您的编译脚本成功触发，【${{matrix.target}}】文件夹编译【${{env.TARGET_PROFILE}}】中,请耐心等待...... 😋(${{env.Date2}})" "http://www.pushplus.plus/send"
+        exit 1
+        fi
+      
+    
+    #- name: DingDing_push 1消息通知1
+    #  if: env.DingDing_push == 'true' && !cancelled()
+    #  run: |
+    #   send_dingding="curl -s \"https://oapi.dingtalk.com/robot/send?access_token=${whkey}\" -H 'Content-Type: application/json' -d '{\"msgtype\": \"markdown\",\"markdown\": {\"title\":"
+    #   send_content0="【${{matrix.target}}】源码正在启动编译！请等候，6小时后若无编译成功消息提示，请点击以下网址查看原因。"
+    #   markdown_splitline="\n\n---\n\n"
+    #   GITHUB_WORKFLOW_URL=https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+    #   nowtime=`date "+%Y-%m-%d %H:%M:%S"`
+    #   eval "$send_dingding \"${send_content0}\",\"text\":\"${nowtime} $markdown_splitline #### <font color=#6A65FF>${send_content0}</font>\n\n[点此链接查看](${GITHUB_WORKFLOW_URL})\"}}'"
     
     
     - name: Download package 下载包
@@ -216,6 +226,22 @@ jobs:
         tag_name: ${{ env.date1 }}_${{matrix.target}}
         body_path: release.txt
 
+    
+    - name: pushplus信息通知2
+      continue-on-error: true
+      if: env.PUSH_PLUS_TOKEN && env.PUSH_PLUS == 'true' && !cancelled() 
+      run: |
+        if [[ "${{steps.organize.outputs.status }}" == 'failure' ]]; then
+            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{ env.SOURCE }}-${{ env.TARGET_PROFILE }}]编译失败" --data "content=我亲爱的❌主人❌：您使用【${{matrix.target}}】文件夹编译的[${{ env.SOURCE }}-${{ env.TARGET_PROFILE }}]固件(${{env.Library}}仓库的#${{env.Run_number}}号)编译失败😴！(${{env.Date2}})" "http://www.pushplus.plus/send"
+          elif [[ "${{steps.organize.outputs.status}}" == 'success' ]] && [[ "${{steps.tag.outputs.status}}" == 'success' ]]; then
+            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{ env.SOURCE }}-${{ env.TARGET_PROFILE }}]编译成功,发布成功" --data "content=我亲爱的✨主人✈️：您使用【${{matrix.target}}】文件夹编译的[${{ env.SOURCE }}-${{ env.TARGET_PROFILE }}]固件(${{env.Library}}仓库的#${{env.Run_number}}号)顺利编译成功,发布云端在线更新使用的固件成功！🎈(${{env.Date2}})" "http://www.pushplus.plus/send"
+          elif [[ "${{steps.organize.outputs.status}}" == 'success' ]] && [[ "${{steps.tag.outputs.status}}" == 'skipped' ]]; then
+            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{ env.SOURCE }}-${{ env.TARGET_PROFILE }}]编译成功" --data "content=我亲爱的✨主人✨：您使用【${{matrix.target}}】文件夹编译的[${{ env.SOURCE }}-${{ env.TARGET_PROFILE }}]固件💐(${{env.Library}}仓库的#${{env.Run_number}}号)顺利编译完成了✌️💯！(${{env.Tongzhi_Date}})" "http://www.pushplus.plus/send"
+          elif [[ "${{steps.organize.outputs.status}}" == 'success' ]] && [[ "${{steps.tag.outputs.status}}" == 'failure' ]]; then  
+            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{ env.SOURCE }}-${{ env.TARGET_PROFILE }}]编译成功,发布失败" --data "content=我亲爱的✨主人❌：您使用【${{matrix.target}}】文件夹编译的[${{ env.SOURCE }}-${{ env.TARGET_PROFILE }}]固件(${{env.Library}}仓库的#${{env.Run_number}}号)顺利编译成功✌️,💥但是发布云端在线更新使用的固件失败了💥！(${{env.Tongzhi_Date}})" "http://www.pushplus.plus/send"
+          fi
+        fi       
+    
     
     - name: 删除工作流、释放Actions空间
       if: env.REPO_TOKEN
