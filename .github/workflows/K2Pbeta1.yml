@@ -1,10 +1,11 @@
+#
 #=================================================
 # Description: Build OpenWrt using GitHub Actions
 # Lisence: MIT
 # Author: HiJwm
 # 感谢P3TERX <https://p3terx.com>
 #=================================================
-
+# Copyright (c) 2022-2023 HiJwm
 
 name: Build K2Pbeta1
 
