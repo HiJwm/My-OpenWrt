@@ -35,7 +35,7 @@ env:
   TZ: Asia/Shanghai
   whkey: ${{ secrets.WEBHOOK }}
   DingDing_push: true
-  REPO_TOKEN: ${{ secrets.ACTIONS_TRIGGER_PAT }}
+  REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
 
 jobs:
   build:
@@ -204,18 +204,28 @@ jobs:
         [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
         echo "::set-output name=status::success"
     
-    - name: Upload firmware to release 发布固件
-      uses: softprops/action-gh-release@v1
-      if: steps.tag.outputs.status == 'success' && !cancelled()
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        files: "${{ env.FIRMWARE }}/*"
-        name: ${{ env.date2 }} ${{matrix.target}}
-        tag_name: ${{ env.date1 }}_${{matrix.target}}
-        body_path: release.txt
+    #- name: Upload firmware to release 发布固件
+    #  uses: softprops/action-gh-release@v1
+    #  if: steps.tag.outputs.status == 'success' && !cancelled()
+    #  env:
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #  with:
+    #    files: "${{ env.FIRMWARE }}/*"
+    #    name: ${{ env.date2 }} ${{matrix.target}}
+    #    tag_name: ${{ env.date1 }}_${{matrix.target}}
+    #    body_path: release.txt
 
-    
+    - name: 发送[在线更新固件]至云端1
+      id: regular
+      continue-on-error: true
+      if: steps.tag.outputs.status == 'success' && !cancelled() 
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.REPO_TOKEN }}
+        file: "${{ env.FIRMWARE }}/*"
+        tag: ${{ env.date1 }}_${{matrix.target}}
+        overwrite: true
+        file_glob: true
     #- name: DingDing_push推送通知2
     #  id: dingtalk
     #  if: steps.organize.outputs.status == 'success' && env.DingDing_push == 'true' && !cancelled()
@@ -224,14 +234,15 @@ jobs:
     #   send_content1="恭喜，${{matrix.target}}源码固件编译成功！
     #   markdown_splitline="\n\n---\n\n"
     #   eval "$send_dingding \"${send_content0}\",\"text\":\"${date1} $markdown_splitline #### <font color=#6A65FF>${send_content0}</font>\n\n[点此链接查看](${GITHUB_WORKFLOW_URL})\"}}'"
-     - name: 清理Actions空间
-       if: env.REPO_TOKEN
-       uses: Mattraks/delete-workflow-runs@main
-       with:
-         token: ${{ secrets.REPO_TOKEN }}
-         repository: ${{ github.repository }}
-         keep_minimum_runs: 1
-         retain_days: 1
+    
+    - name: 清理Actions空间
+      if: env.REPO_TOKEN
+      uses: Mattraks/delete-workflow-runs@main
+      with:
+        token: ${{ secrets.REPO_TOKEN }}
+        repository: ${{ github.repository }}
+        keep_minimum_runs: 1
+        retain_days: 1
     
     - name: 删除releases
       if: env.REPO_TOKEN
@@ -244,19 +255,19 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
     
     
-     - name: Delete workflow runs 删除工作流
-       uses: GitRML/delete-workflow-runs@main
-       with:
-         retain_days: 1
-         keep_minimum_runs: 1
-       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #- name: Delete workflow runs 删除工作流
+    #  uses: GitRML/delete-workflow-runs@main
+    #   with:
+    #    retain_days: 1
+    #    keep_minimum_runs: 1
+    #  env:
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Remove old Releases 删除旧版本
-      uses: dev-drprasad/delete-older-releases@v0.1.0
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-      with:
-        keep_latest: 3
-        delete_tags: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.ACTIONS_TRIGGER_PAT }}
+    #- name: Remove old Releases 删除旧版本
+    #  uses: dev-drprasad/delete-older-releases@v0.1.0
+    #  if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+    #  with:
+    #    keep_latest: 3
+    #    delete_tags: true
+    #  env:
+    #    GITHUB_TOKEN: ${{ secrets.ACTIONS_TRIGGER_PAT }}
