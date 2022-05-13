@@ -225,13 +225,13 @@ jobs:
     #   markdown_splitline="\n\n---\n\n"
     #   eval "$send_dingding \"${send_content0}\",\"text\":\"${date1} $markdown_splitline #### <font color=#6A65FF>${send_content0}</font>\n\n[点此链接查看](${GITHUB_WORKFLOW_URL})\"}}'"
      - name: 清理Actions空间
-       if: env.REPO_TOKEN
-       uses: Mattraks/delete-workflow-runs@main
-       with:
-          token: ${{ secrets.REPO_TOKEN }}
-          repository: ${{ github.repository }}
-          keep_minimum_runs: 1
-          retain_days: 1
+      if: env.REPO_TOKEN
+      uses: Mattraks/delete-workflow-runs@main
+      with:
+         token: ${{ secrets.REPO_TOKEN }}
+         repository: ${{ github.repository }}
+         keep_minimum_runs: 1
+         retain_days: 1
     
     - name: 删除releases
      if: env.REPO_TOKEN
