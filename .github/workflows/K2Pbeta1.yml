@@ -114,7 +114,7 @@ jobs:
       continue-on-error: true
       if: env.PUSH_PLUS_TOKEN && env.PUSH_PLUS == 'true' && !cancelled()
       run: |
-        curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="开始编译【${{matrix.target}}】" --data "content=🎉 主人💕：您的编译脚本成功触发，【${{matrix.target}}】文件夹编译【${{env.TARGET_PROFILE}}】中,请耐心等待...... 😋(${{env.Date2}})" "http://www.pushplus.plus/send"
+        curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="开始编译，【${{matrix.target}}】源码" --data "content=🎉 主人💕：您的编译脚本成功触发，使用【${{matrix.target}}】源码，请耐心等待...... 😋(${{env.date1}})" "http://www.pushplus.plus/send"
       
         
     #- name: DingDing_push 1消息通知1
@@ -244,13 +244,13 @@ jobs:
       if: env.PUSH_PLUS_TOKEN && env.PUSH_PLUS == 'true' && !cancelled() 
       run: |
         if [[ "${{steps.organize.outputs.status }}" == 'failure' ]]; then
-            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{ env.SOURCE }}-${{ env.TARGET_PROFILE }}]编译失败" --data "content=我亲爱的❌主人❌：您使用【${{matrix.target}}】源码编译固件，编译失败😴！(${{env.date1}})" "http://www.pushplus.plus/send"
+            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{matrix.target}}]源码固件，编译失败" --data "content=我亲爱的❌主人❌：您使用【${{matrix.target}}】源码编译固件，编译失败😴！(${{env.date1}})" "http://www.pushplus.plus/send"
           elif [[ "${{steps.organize.outputs.status}}" == 'success' ]] && [[ "${{steps.tag.outputs.status}}" == 'success' ]]; then
-            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{ env.SOURCE }}-${{ env.TARGET_PROFILE }}]编译成功,发布成功" --data "content=我亲爱的✨主人✨：您使用【${{matrix.target}}】源码编译固件，顺利编译成功,并发布到云端🎈(${{env.date1}})" "http://www.pushplus.plus/send"
+            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{matrix.target}}]源码固件，编译成功,发布成功" --data "content=我亲爱的✨主人✨：您使用【${{matrix.target}}】源码编译固件，顺利编译成功,并发布到云端🎈(${{env.date1}})" "http://www.pushplus.plus/send"
           elif [[ "${{steps.organize.outputs.status}}" == 'success' ]] && [[ "${{steps.tag.outputs.status}}" == 'skipped' ]]; then
-            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{ env.SOURCE }}-${{ env.TARGET_PROFILE }}]编译成功" --data "content=我亲爱的✨主人✨：您使用【${{matrix.target}}】源码编译固件，💐顺利编译完成了✌️💯！(${{env.date1}})" "http://www.pushplus.plus/send"
+            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{matrix.target}}]源码固件，编译成功" --data "content=我亲爱的✨主人✨：您使用【${{matrix.target}}】源码编译固件，💐顺利编译完成了✌️💯！(${{env.date1}})" "http://www.pushplus.plus/send"
           elif [[ "${{steps.organize.outputs.status}}" == 'success' ]] && [[ "${{steps.tag.outputs.status}}" == 'failure' ]]; then  
-            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{ env.SOURCE }}-${{ env.TARGET_PROFILE }}]编译成功,发布失败" --data "content=我亲爱的✨主人❌：您使用【${{matrix.target}}】源码编译固件，顺利编译成功✌️,💥但是发布云端失败了💥！(${{env.date1}})" "http://www.pushplus.plus/send"
+            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{matrix.target}}]源码固件，编译成功,发布失败" --data "content=我亲爱的✨主人❌：您使用【${{matrix.target}}】源码编译固件，顺利编译成功✌️,💥但是发布云端失败了💥！(${{env.date1}})" "http://www.pushplus.plus/send"
         fi
            
     
