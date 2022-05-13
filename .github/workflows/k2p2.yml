@@ -9,7 +9,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #修改：HiJwm
 
-name: Build K2P（lean5）
+name: Build K2P2（lean5）
 
 on:
   repository_dispatch:
@@ -224,10 +224,10 @@ jobs:
     #   send_content1="恭喜，${{matrix.target}}源码固件编译成功！
     #   markdown_splitline="\n\n---\n\n"
     #   eval "$send_dingding \"${send_content0}\",\"text\":\"${date1} $markdown_splitline #### <font color=#6A65FF>${send_content0}</font>\n\n[点此链接查看](${GITHUB_WORKFLOW_URL})\"}}'"
-    - name: 清理Actions空间
-      if: env.REPO_TOKEN
-      uses: Mattraks/delete-workflow-runs@main
-      with:
+     - name: 清理Actions空间
+       if: env.REPO_TOKEN
+       uses: Mattraks/delete-workflow-runs@main
+       with:
           token: ${{ secrets.REPO_TOKEN }}
           repository: ${{ github.repository }}
           keep_minimum_runs: 1
