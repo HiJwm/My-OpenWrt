@@ -7,7 +7,7 @@
 #=================================================
 # Copyright (c) 2022-2023 HiJwm
 
-name: Build K2Pbeta1
+name: K2P-Lean
 
 on:
   repository_dispatch:
@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [K2Pbeta1]
+        target: [K2P-Lean]
     steps:
     - name: Checkout 检查
       uses: actions/checkout@main
