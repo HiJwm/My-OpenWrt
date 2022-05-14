@@ -28,8 +28,8 @@ mv package/lucimod/* feeds/luci/modules/luci-base/htdocs/luci-static/resources/i
 #sed -i 's/bootstrap/argon/g' feeds/luci/collections/luci/Makefile 
 
 #添加app
-svn co https://github.com/kenzok8/openwrt-packages/trunk/luci-app-pushbot ./package/luci-app-pushbot
-chmod -R 755 ./package/luci-app-pushbot/*
+#svn co https://github.com/kenzok8/openwrt-packages/trunk/luci-app-pushbot ./package/luci-app-pushbot
+#chmod -R 755 ./package/luci-app-pushbot/*
 
 # 修改openwrt登陆地址,把下面的192.168.2.1修改成你想要的就可以了，其他的不要动
 sed -i 's/192.168.1.1/192.168.100.101/g' package/base-files/files/bin/config_generate
