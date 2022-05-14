@@ -11,16 +11,14 @@
 
 
 # Change Argon Theme
-# rm -rf ./package/lean/luci-theme-argon 
-#rm -rf ./feeds/luci/themes/luci-theme-argon
-#git clone https://github.com/jerrykuku/luci-theme-argon.git ./package/luci-theme-argon
-#git clone https://github.com/jerrykuku/luci-app-argon-config.git ./package/luci-app-argon-config
+rm -rf ./feeds/luci/themes/luci-theme-argon
+git clone https://github.com/jerrykuku/luci-theme-argon.git ./package/luci-theme-argon
+git clone https://github.com/jerrykuku/luci-app-argon-config.git ./package/luci-app-argon-config
 
 # Change default BackGround img
-#wget -O ./package/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg https://github.com/jiawm/My-OpenWrt-by-Lean/raw/main/BackGround/2.jpg
-#svn co https://github.com/xylz0928/luci-mod/trunk/feeds/luci/modules/luci-base/htdocs/luci-static/resources/icons ./package/lucimod
-#mv package/lucimod/* feeds/luci/modules/luci-base/htdocs/luci-static/resources/icons/
-
+wget -O ./package/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg https://github.com/HiJwm/MySettings/raw/main/BackGround/2.jpg
+svn co https://github.com/xylz0928/luci-mod/trunk/feeds/luci/modules/luci-base/htdocs/luci-static/resources/icons ./package/lucimod
+mv package/lucimod/* feeds/luci/modules/luci-base/htdocs/luci-static/resources/icons/
 
 #更换默认主题为argon，并删除bootstrap主题 
 #sed -i 's#luci-theme-bootstrap#luci-theme-argon#g' feeds/luci/collections/luci/Makefile
