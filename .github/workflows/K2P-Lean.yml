@@ -23,8 +23,8 @@ env:
   REPO_BRANCH: master
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: MenuConfig/MakeMenu.K2P.config
-  DIY_P1_SH: Scripts/diy-part1-x86-lede.sh
-  DIY_P2_SH: Scripts/diy-part2-x86-lede.sh
+  DIY_P1_SH: Scripts/diy-part1-x86-lean.sh
+  DIY_P2_SH: Scripts/diy-part2-x86-lean.sh
   UPLOAD_BIN_DIR: true
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
