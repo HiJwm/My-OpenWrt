@@ -259,7 +259,7 @@ jobs:
       with:
         token: ${{ secrets.REPO_TOKEN }}
         repository: ${{ github.repository }}
-        keep_minimum_runs: 6
+        keep_minimum_runs: 3
         retain_days: 1
     
     - name: 删除旧版本releases
@@ -267,7 +267,7 @@ jobs:
       uses: dev-drprasad/delete-older-releases@master
       with:
         repo: ${{ github.repository }}
-        keep_latest: 6
+        keep_latest: 3
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
