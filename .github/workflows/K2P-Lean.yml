@@ -112,7 +112,7 @@ jobs:
       continue-on-error: true
       if: env.PUSH_PLUS_TOKEN && env.PUSH_PLUS == 'true' && !cancelled()
       run: |
-        curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="开始编译，【${{matrix.target}}】源码" --data "content=🎉 主人💕：您的编译脚本成功触发，使用【${{matrix.target}}】源码，请耐心等待...... 😋(${{env.date1}})" "http://www.pushplus.plus/send"
+        curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="开始编译，【${{matrix.target}}】源码" --data "content=🎉 主人💕：您的编译脚本成功触发，使用【${{matrix.target}}】源码，请耐心等待...... 😋开始编译时间：${{env.date1}}" "http://www.pushplus.plus/send"
       
         
     #- name: DingDing_push 1消息通知1
@@ -145,7 +145,7 @@ jobs:
         echo "::set-output name=status::success"
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV #定义设备名称
-        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+        echo "FILE_DATE=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
     
     - name: Check space usage 检查空间使用情况
       if: (!cancelled())
@@ -155,7 +155,7 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
-        name: ${{matrix.target}}_OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        name: ${{matrix.target}}_OpenWrt_bin${{ env.DEVICE_NAME }}_${{ env.FILE_DATE }}
         path: openwrt/bin
 
     - name: Organize files 整理文件
@@ -182,7 +182,7 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: ${{matrix.target}}_OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        name: ${{matrix.target}}_OpenWrt_firmware${{ env.DEVICE_NAME }}_${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
 
     - name: Upload firmware to cowtransfer 上传固件到cowtransfer
@@ -207,7 +207,7 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
-        echo "::set-output name=release_tag::$(date +"%Y.%m.%d-%H%M")"
+        echo "::set-output name=release_tag::${{ env.FILE_DATE }}   #原版$(date +"%Y.%m.%d-%H%M")"
         touch release.txt
         [ $UPLOAD_COWTRANSFER = true ] && echo "🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
         [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
@@ -221,7 +221,7 @@ jobs:
       with:
         files: "${{ env.FIRMWARE }}/*"
         name: ${{ env.date2 }} ${{matrix.target}}
-        tag_name: ${{ steps.tag.outputs.release_tag }}_${{matrix.target}}
+        tag_name: ${{ env.FILE_DATE }}_${{matrix.target}}
         body_path: release.txt
 
     #- name: 发布固件备用，尚有不完善
@@ -242,13 +242,13 @@ jobs:
       if: env.PUSH_PLUS_TOKEN && env.PUSH_PLUS == 'true' && !cancelled() 
       run: |
         if [[ "${{steps.organize.outputs.status }}" == 'failure' ]]; then
-            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{matrix.target}}]源码固件，编译失败" --data "content=我亲爱的❌主人❌：您使用【${{matrix.target}}】源码编译固件，编译失败😴！(${{ steps.tag.outputs.release_tag }})" "http://www.pushplus.plus/send"
+            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{matrix.target}}]源码固件，编译失败" --data "content=我亲爱的❌主人❌：您使用【${{matrix.target}}】源码编译固件，编译失败了😴！时间：${{ env.FILE_DATE }}" "http://www.pushplus.plus/send"
           elif [[ "${{steps.organize.outputs.status}}" == 'success' ]] && [[ "${{steps.tag.outputs.status}}" == 'success' ]]; then
-            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{matrix.target}}]源码固件，编译成功,发布成功" --data "content=我亲爱的✨主人✨：您使用【${{matrix.target}}】源码编译固件，顺利编译成功,并发布到云端🎈(${{ steps.tag.outputs.release_tag }})" "http://www.pushplus.plus/send"
+            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{matrix.target}}]源码固件，编译成功,发布成功" --data "content=我亲爱的✨主人✨：您使用【${{matrix.target}}】源码编译固件，顺利编译成功,并发布到云端🎈tag名称：(${{ env.FILE_DATE }}_${{matrix.target}})" "http://www.pushplus.plus/send"
           elif [[ "${{steps.organize.outputs.status}}" == 'success' ]] && [[ "${{steps.tag.outputs.status}}" == 'skipped' ]]; then
-            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{matrix.target}}]源码固件，编译成功" --data "content=我亲爱的✨主人✨：您使用【${{matrix.target}}】源码编译固件，💐顺利编译完成了✌️💯！(${{ steps.tag.outputs.release_tag }})" "http://www.pushplus.plus/send"
+            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{matrix.target}}]源码固件，编译成功" --data "content=我亲爱的✨主人✨：您使用【${{matrix.target}}】源码编译固件，💐顺利编译完成了✌️💯！时间：${{ env.FILE_DATE }}" "http://www.pushplus.plus/send"
           elif [[ "${{steps.organize.outputs.status}}" == 'success' ]] && [[ "${{steps.tag.outputs.status}}" == 'failure' ]]; then  
-            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{matrix.target}}]源码固件，编译成功,发布失败" --data "content=我亲爱的✨主人❌：您使用【${{matrix.target}}】源码编译固件，顺利编译成功✌️,💥但是发布云端失败了💥！(${{ steps.tag.outputs.release_tag }})" "http://www.pushplus.plus/send"
+            curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="[${{matrix.target}}]源码固件，编译成功,发布失败" --data "content=我亲爱的✨主人❌：您使用【${{matrix.target}}】源码编译固件，顺利编译成功✌️,💥但是发布云端失败了💥！时间：${{ env.FILE_DATE }}" "http://www.pushplus.plus/send"
         fi
            
     
