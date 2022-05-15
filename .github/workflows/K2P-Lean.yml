@@ -107,8 +107,8 @@ jobs:
         curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="开始编译，【${{matrix.target}}】源码" --data "content=🎉 主人💕：您的编译脚本成功触发，使用【${{matrix.target}}】源码，请耐心等待...... 😋开始编译时间：${nowtime}" "http://www.pushplus.plus/send"
       
         
-    - name: DingDing_push 1消息通知1
-       continue-on-error: true
+    - name: DingDing_push信息通知
+      continue-on-error: true
       if: env.DingDing_push == 'true' && !cancelled()
       run: |
        send_dingding="curl -s \"https://oapi.dingtalk.com/robot/send?access_token=${whkey}\" -H 'Content-Type: application/json' -d '{\"msgtype\": \"markdown\",\"markdown\": {\"title\":"
