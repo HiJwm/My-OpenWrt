@@ -32,10 +32,10 @@ env:
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
   whkey: ${{ secrets.WEBHOOK }} #dingtalk secrets
-  DingDing_push: false
   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
   PUSH_PLUS_TOKEN: ${{ secrets.PUSH_PLUS_TOKEN }}
   PUSH_PLUS: true
+  DingDing_push: false
 
 jobs:
   build:
@@ -63,24 +63,15 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
         df -h
-    - name: 设置当前的日期
-      id: date
-      run: |
-        echo "date1=$(date +'%Y.%m.%d-%H%M')" >> $GITHUB_ENV  
-        echo "date2=$(date +'%m/%d %Y')" >> $GITHUB_ENV
-        echo "date3=$(date +'%m.%d')" >> $GITHUB_ENV
-        echo "date4=$(date +'%m.%d.%H')" >> $GITHUB_ENV
-        VERSION="$(echo "${{github.event.action}}" | grep -Eo " [0-9.]+" | sed -e 's/ //')" || true
-        [ "$VERSION" ] && echo "VERSION=$VERSION" >> $GITHUB_ENV || echo "VERSION=$(date +'%m.%d')" >> $GITHUB_ENV  
-    
-    - name: Clone source code 克隆源代码
+        
+    - name: Clone source code 克隆源码
       working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
     
-    - name: Load custom feeds 自定义安装源
+    - name: Load custom feeds 自定义feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH
@@ -93,7 +84,7 @@ jobs:
     - name: Install feeds 安装feeds
       run: cd openwrt && ./scripts/feeds install -a
 
-    - name: Load custom configuration 自定义设置
+    - name: Load custom configuration 加载自定义设置
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
@@ -112,19 +103,20 @@ jobs:
       continue-on-error: true
       if: env.PUSH_PLUS_TOKEN && env.PUSH_PLUS == 'true' && !cancelled()
       run: |
-        curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="开始编译，【${{matrix.target}}】源码" --data "content=🎉 主人💕：您的编译脚本成功触发，使用【${{matrix.target}}】源码，请耐心等待...... 😋开始编译时间：${{env.date1}}" "http://www.pushplus.plus/send"
+        nowtime=`date "+%Y-%m-%d %H:%M:%S"`
+        curl -k --data token="${{ secrets.PUSH_PLUS_TOKEN }}" --data title="开始编译，【${{matrix.target}}】源码" --data "content=🎉 主人💕：您的编译脚本成功触发，使用【${{matrix.target}}】源码，请耐心等待...... 😋开始编译时间：${nowtime}" "http://www.pushplus.plus/send"
       
         
-    #- name: DingDing_push 1消息通知1
-    #   continue-on-error: true
-    #  if: env.DingDing_push == 'true' && !cancelled()
-    #  run: |
-    #   send_dingding="curl -s \"https://oapi.dingtalk.com/robot/send?access_token=${whkey}\" -H 'Content-Type: application/json' -d '{\"msgtype\": \"markdown\",\"markdown\": {\"title\":"
-    #   send_content0="【${{matrix.target}}】源码正在启动编译！请等候，6小时后若无编译成功消息提示，请点击以下网址查看原因。"
-    #   markdown_splitline="\n\n---\n\n"
-    #   GITHUB_WORKFLOW_URL=https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
-    #   nowtime=`date "+%Y-%m-%d %H:%M:%S"`
-    #   eval "$send_dingding \"${send_content0}\",\"text\":\"${nowtime} $markdown_splitline #### <font color=#6A65FF>${send_content0}</font>\n\n[点此链接查看](${GITHUB_WORKFLOW_URL})\"}}'"
+    - name: DingDing_push信息通知
+      continue-on-error: true
+      if: env.DingDing_push == 'true' && !cancelled()
+      run: |
+       nowtime=`date "+%Y-%m-%d %H:%M:%S"`
+       send_dingding="curl -s \"https://oapi.dingtalk.com/robot/send?access_token=${whkey}\" -H 'Content-Type: application/json' -d '{\"msgtype\": \"markdown\",\"markdown\": {\"title\":"
+       send_content0="🎉 主人💕：您的编译脚本成功触发，使用【${{matrix.target}}】源码，请耐心等待...... 😋开始编译时间：${nowtime}。"
+       markdown_splitline="\n\n---\n\n"
+       GITHUB_WORKFLOW_URL=https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+       eval "$send_dingding \"${send_content0}\",\"text\":\"${nowtime} $markdown_splitline #### <font color=#6A65FF>${send_content0}</font>\n\n[点此链接查看](${GITHUB_WORKFLOW_URL})\"}}'"
     
     
     - name: Download package 下载包
@@ -140,12 +132,19 @@ jobs:
       id: compile
       run: |
         cd openwrt
-        echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 || make -j1 V=s
+        echo -e "$(($(nproc)+1)) thread compile"
+        make -j$(($(nproc)+1)) || make -j1 V=s
         echo "::set-output name=status::success"
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+        
+    - name: preparation before release发布前准备
+      run: |
+        echo "FILE_DATE=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV  #定义文件日期
+        echo "date1=$(date +'%m/%d %Y')" >> $GITHUB_ENV #定义日期1
+        echo "date2=$(date +'%m.%d.%H')" >> $GITHUB_ENV #定义日期2
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV #定义设备名称
-        echo "FILE_DATE=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+        VERSION="$(echo "${{github.event.action}}" | grep -Eo " [0-9.]+" | sed -e 's/ //')" || true
+        [ "$VERSION" ] && echo "VERSION=$VERSION" >> $GITHUB_ENV || echo "VERSION=$(date +'%m.%d')" >> $GITHUB_ENV
     
     - name: Check space usage 检查空间使用情况
       if: (!cancelled())
@@ -164,10 +163,10 @@ jobs:
       run: |
         mkdir firmware
         mv -f openwrt/bin/targets/*/*/{*combined*,*sysupgrade*} ./firmware/ 2>/dev/null || true
-        #cp openwrt/.config  ./firmware/${{matrix.target}}.config
-        #cp openwrt/build_dir/target-*/linux-*/linux-*/.config ./firmware/${{matrix.target}}_kernel.config
+        #cp openwrt/.config  ./firmware/${{matrix.target}}.config  #发布.config文件，删除#起效
+        #cp openwrt/build_dir/target-*/linux-*/linux-*/.config ./firmware/${{matrix.target}}_kernel.config #发布.config文件，删除#起效
         cd firmware
-        echo "v${{ env.date4 }}" > version.txt
+        echo "v${{ env.date2 }}" > version.txt
         md5=$((md5sum *squashfs-sysupgrade* || md5sum *squashfs-combined-efi*) | awk '{print $1}') 2>/dev/null
         echo $md5 >> version.txt
         rename -v "s/^openwrt/${{ env.VERSION }}-openwrt/" * || true
@@ -220,7 +219,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
       with:
         files: "${{ env.FIRMWARE }}/*"
-        name: ${{ env.date2 }} ${{matrix.target}}
+        name: ${{ env.date1 }} ${{matrix.target}}
         tag_name: ${{ env.FILE_DATE }}_${{matrix.target}}
         body_path: release.txt
 
