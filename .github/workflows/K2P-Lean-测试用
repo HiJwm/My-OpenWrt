@@ -7,7 +7,7 @@
 #=================================================
 # Copyright (c) 2022-2023 HiJwm
 
-#name: K2P-Lean
+name: K2P-Lean
 
 on:
   repository_dispatch:
