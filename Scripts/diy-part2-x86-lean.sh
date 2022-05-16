@@ -20,11 +20,11 @@ sed -i 's/5.15/5.10/g' ./target/linux/x86/Makefile
 #sed -i 's/invalid/# invalid/g' package/network/services/samba36/files/smb.conf.template
 
 #修改版本号
-modelmark=R`TZ=UTC-8 date +%Y-%m-%d -d +"1"days`''
+modelmark=R`TZ=UTC-8 date +%Y-%m-%d -d +"0"days`''
 sed -i "s/DISTRIB_REVISION='R[0-9]*\.[0-9]*\.[0-9]*/DISTRIB_REVISION='$modelmark/g" ./package/lean/default-settings/files/zzz-default-settings
 
 # 修改版本号-tty
-sed -i "s/timestamp/Built on '$(TZ=UTC-8 date +%Y-%m-%d -d +"1"days)'/g" ./package/base-files/files/etc/banner
+sed -i "s/timestamp/Built on '$(TZ=UTC-8 date +%Y-%m-%d -d +"0"days)'/g" ./package/base-files/files/etc/banner
 
 # Change Argon Theme
 # rm -rf ./package/lean/luci-theme-argon 
@@ -85,21 +85,21 @@ sed -i 's/luci-app-flowoffload//g' target/linux/x86/Makefile
 #rm -rf ./feeds/luci/applications/luci-app-easymesh
 
 #更换部分插件
-rm -rf ./feeds/smpackage/luci-app-adguardhome
-rm -rf ./feeds/smpackage/adguardhome
-rm -rf ./feeds/smpackage/luci-app-smartdns
-rm -rf ./feeds/smpackage/smartdns
+#rm -rf ./feeds/smpackage/luci-app-adguardhome
+#rm -rf ./feeds/smpackage/adguardhome
+#rm -rf ./feeds/smpackage/luci-app-smartdns
+#rm -rf ./feeds/smpackage/smartdns
 #添加281677160包
-svn co https://github.com/281677160/openwrt-package/trunk/luci-app-adguardhome ./package/luci-app-adguardhome
-chmod -R 755 ./package/luci-app-adguardhome/*
-svn co https://github.com/281677160/openwrt-package/trunk/adguardhome ./package/adguardhome
-chmod -R 755 ./package/adguardhome/*
-svn co https://github.com/281677160/openwrt-package/trunk/luci-app-smartdns ./package/luci-app-smartdns
-chmod -R 755 ./package/luci-app-smartdns/*
-svn co https://github.com/281677160/openwrt-package/trunk/smartdns ./package/smartdns
-chmod -R 755 ./package/smartdns/*
-svn co https://github.com/281677160/openwrt-package/trunk/luci-app-oaf ./package/luci-app-oaf
-chmod -R 755 ./package/luci-app-oaf/*
+#svn co https://github.com/281677160/openwrt-package/trunk/luci-app-adguardhome ./package/luci-app-adguardhome
+#chmod -R 755 ./package/luci-app-adguardhome/*
+#svn co https://github.com/281677160/openwrt-package/trunk/adguardhome ./package/adguardhome
+#chmod -R 755 ./package/adguardhome/*
+#svn co https://github.com/281677160/openwrt-package/trunk/luci-app-smartdns ./package/luci-app-smartdns
+#chmod -R 755 ./package/luci-app-smartdns/*
+#svn co https://github.com/281677160/openwrt-package/trunk/smartdns ./package/smartdns
+#chmod -R 755 ./package/smartdns/*
+#svn co https://github.com/281677160/openwrt-package/trunk/luci-app-oaf ./package/luci-app-oaf
+#chmod -R 755 ./package/luci-app-oaf/*
 
 # 修改插件名字
 #sed -i 's/"aMule设置"/"电驴下载"/g' `grep "aMule设置" -rl ./`
