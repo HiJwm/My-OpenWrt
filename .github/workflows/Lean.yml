@@ -167,7 +167,7 @@ jobs:
         #cp openwrt/build_dir/target-*/linux-*/linux-*/.config ./firmware/${{matrix.target}}_kernel.config #发布.config文件，删除#起效
         cd firmware
         echo "v${{ env.date2 }}" > version.txt
-        md5=$((md5sum *squashfs-sysupgrade* || md5sum *squashfs-combined-efi*) | awk '{print $1}') 2>/dev/null
+        md5=$((md5sum *squashfs-sysupgrade* || md5sum *squashfs-combined*) | awk '{print $1}') 2>/dev/null
         echo $md5 >> version.txt
         rename -v "s/^openwrt/${{ env.VERSION }}-openwrt/" * || true
         rename -v "s/friendlyarm_//" *gz || true
